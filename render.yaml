@@ -3,8 +3,10 @@ services:
     name: pythonanywhere-extend-api
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt && playwright install --with-deps chromium
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --timeout 120 app:app
+    buildCommand: pip install -r requirements.txt && PLAYWRIGHT_BROWSERS_PATH=/opt/render/project/src/.playwright-browsers python -m playwright install chromium
+    startCommand: bash scripts/render_start.sh
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.9"
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/src/.playwright-browsers
