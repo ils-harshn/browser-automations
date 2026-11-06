@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import subprocess
 import sys
 import threading
 from pathlib import Path
+
+logger = logging.getLogger("playwright_setup")
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
@@ -29,9 +32,9 @@ def configure_playwright() -> None:
 
     # Render native Python runtime: keep browsers inside the deploy directory.
     if os.environ.get("RENDER"):
-        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = str(
-            PROJECT_ROOT / ".playwright-browsers"
-        )
+        path = str(PROJECT_ROOT / ".playwright-browsers")
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = path
+        logger.info("Render detected; PLAYWRIGHT_BROWSERS_PATH=%s", path)
 
 
 def _headless_shell_installed(browsers_dir: Path) -> bool:
@@ -63,11 +66,13 @@ def ensure_playwright_chromium() -> None:
         os.environ["PLAYWRIGHT_BROWSERS_PATH"] = target
         Path(target).mkdir(parents=True, exist_ok=True)
 
+        logger.info("Installing Chromium to %s", target)
         subprocess.run(
             [sys.executable, "-m", "playwright", "install", "chromium"],
             check=True,
             env=os.environ.copy(),
         )
+        logger.info("Chromium install finished")
         _install_done = True
 
 
