@@ -1,5 +1,7 @@
 import os
 
+import playwright_setup  # noqa: F401 — before automation / playwright
+
 from flask import Flask, jsonify, request
 
 from automation import ExtensionError, run_extension

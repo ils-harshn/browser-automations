@@ -1,4 +1,9 @@
+import playwright_setup  # noqa: F401 — sets PLAYWRIGHT_BROWSERS_PATH before playwright loads
+
+playwright_setup.ensure_playwright_chromium()
+
 import asyncio
+
 from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
 
 
@@ -9,6 +14,8 @@ class ExtensionError(Exception):
 async def extend_pythonanywhere_webapp(username: str, password: str) -> dict:
     if not username or not password:
         raise ValueError("username and password are required")
+
+    playwright_setup.ensure_playwright_chromium()
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -40,7 +47,6 @@ async def extend_pythonanywhere_webapp(username: str, password: str) -> dict:
             final_url = page.url
             body_text = (await page.inner_text("body")).lower()
             if "extend" not in body_text and "month" not in body_text:
-                # Still treat as success if we reached webapps after click without error banner
                 if await page.locator(".alert-error").count():
                     msg = await page.locator(".alert-error").first.inner_text()
                     raise ExtensionError(msg.strip() or "Extension failed.")
